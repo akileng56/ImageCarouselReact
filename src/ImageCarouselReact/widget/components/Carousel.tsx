@@ -5,14 +5,11 @@
  * This code is under the MIT license found here:
  * https://github.com/react-bootstrap/react-bootstrap/blob/master/LICENSE
  */
-import { IBootstrapProps, prefix } from "../utils/bootstrapUtils";
+import { IBootstrapProps, IObject, prefix } from "../utils/bootstrapUtils";
 import ValidComponentChildren from "../utils/ValidComponentChildren";
 import Glyphicon from "./Glyphicon";
 import classNames = require("ImageCarouselReact/lib/classnames");
 import * as React from "ImageCarouselReact/lib/react"; // Gets children that are React components
-
-// TODO: `slide` should be `animate`.
-// TODO: Use uncontrollable.
 
 export interface ICarouselProps extends React.Props<Carousel> {
     /**
@@ -22,7 +19,7 @@ export interface ICarouselProps extends React.Props<Carousel> {
      * @type {boolean}
      * @memberOf ICarouselProps
      */
-    slide?: boolean; // TODO: Animate
+    slide?: boolean;
     /**
      * Little dots at the bottom of each slide
      *
@@ -113,7 +110,7 @@ export interface ICarouselProps extends React.Props<Carousel> {
      */
     bsProps?: IBootstrapProps;
     elementProps?: {};
-};
+}
 
 export type Direction = "prev" | "next";
 
@@ -199,8 +196,10 @@ class Carousel extends React.Component<ICarouselProps, ICarouselState> {
         const props = this.props;
         const { showIndicators, showControls, wrap, prevIcon, nextIcon, className, children, bsProps } = props;
         const activeIndex = this.getActiveIndex();
-        let classes: any = {slide: this.props.slide};
-        classes[props.bsProps.bsClass] = true;
+        let classes: IObject = {
+            slide: this.props.slide,
+            [props.bsProps.bsClass]: true,
+        };
 
         const indicators = showIndicators &&
                 this.renderIndicators(children as React.ReactChildren, activeIndex, bsProps);
@@ -244,7 +243,7 @@ class Carousel extends React.Component<ICarouselProps, ICarouselState> {
             indicators.push(
                 <li
                     key={index}
-                    className={index === activeIndex ? "active" : null} // TODO: investigate empty string
+                    className={index === activeIndex ? "active" : null}
                     style={style}
                     onClick={(e: ICarouselEvent<HTMLLIElement>) => this.slide(index, e)}
                 />
@@ -318,7 +317,8 @@ class Carousel extends React.Component<ICarouselProps, ICarouselState> {
             (child: (React.ReactChild), index: number) => {
                 const active = index === activeIndex; // check if item is currently active
                 const previousActive = index === previousActiveIndex; // check if item was previously active
-                // TODO: Add documentation
+                // To prevent unexpected behaviour, the CarouselItems added as children are cloned
+                // but with consistent properties inherited from the Carousel
                 return (
                     React.cloneElement(child as React.ReactElement<any>, {
                         active,
@@ -489,7 +489,8 @@ class Carousel extends React.Component<ICarouselProps, ICarouselState> {
             e.direction = direction;
             onSlide(e);
         }
-        // TODO: documentation
+        // Makes sure the state is not updated while a carousel transition animation is
+        // is still taking place.
         if (this.props.activeIndex == null && index !== previousActiveIndex) {
             if (this.state.previousActiveIndex === null || !this.props.slide) {
                 // If currently animating don't activate the new index.
