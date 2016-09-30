@@ -106,10 +106,9 @@ export class CarouselItem extends React.Component<ICarouselItemProps, ICarouselI
         const classes: IObject = {
             active: active && !animateIn || animateOut,
             item: true,
+            [direction]: direction && active && animateIn,
+            [this.state.direction]: this.state.direction && (animateIn || animateOut),
         };
-        // Alternative is Object.assign ... no support yet
-        classes[direction] = direction && active && animateIn;
-        classes[this.state.direction] = this.state.direction && (animateIn || animateOut);
 
         return (
             <div
